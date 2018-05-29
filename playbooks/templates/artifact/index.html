@@ -42,6 +42,9 @@
               <downloadcard
                 :archives="this.archives"
               ></downloadcard>
+              <linkwarning
+                :removed_links_count="this.removed_links_count"
+              ></linkwarning>
               <filelist
                 :files="this.files"
                 :container_public_url="this.container_public_url"
@@ -78,10 +81,10 @@
          <v-card-title>
            <div>
              <h3>Download All Artifacts</h3>
-             <div>To download all the artifacts relating to this job either
-             download and extract all the archives linked below, or use
-             the following shell snippet: </div>
-             <code>curl {{ this.$root.container_public_url }}/{{ this.$root.archive_base_name }}.txt |while read a; do curl $a |tar xj; done</code>
+             <div>
+               Use the following link to download an archive of artifacts
+               relating to this job.
+             </div>
            </div>
          </v-card-title>
          <v-list>
@@ -108,6 +111,24 @@
            <a :href="archive">{{ this.basename }}</a>
           </v-list-tile-content>
         </v-list-tile>
+      `
+    })
+
+    Vue.component('linkwarning', {
+      props: ["removed_links_count"],
+      template: `
+        <v-card v-if="removed_links_count > 0">
+         <v-card-title>
+           <div>
+             <h3>Symlinks Removed</h3>
+             <div>
+              {{ removed_links_count }} symlinks have been remvoved from this
+              artifact set. Please check the <a href="removedlinks.txt">list of removed symlinks</a>
+              if you are missing a file.
+             </div>
+           </div>
+         </v-card-title>
+       </v-card>
       `
     })
 
@@ -319,6 +340,7 @@
           this.archive_base_name = response.body.archive_base_name
           this.archives = response.body.archives
           this.container_public_url = response.body.container_public_url
+          this.removed_links_count = response.body.removed_links_count
           this.dataloaded = true
         })
       },
